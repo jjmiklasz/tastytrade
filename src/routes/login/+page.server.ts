@@ -37,7 +37,8 @@ const login: Action = async ({ request, cookies }) => {
       path: '/',
       httpOnly: true,
       secure: true,
-      sameSite: 'none'
+      sameSite: 'none',
+      maxAge: 60 * 60 * 24
     })
 
     return { success: true }
