@@ -1,23 +1,21 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	const dispatch = createEventDispatcher();
-
 	interface SymbolData {
 		symbol: string;
 		description: string;
 	}
 
-	let searchText = '';
-	let suggestions: SymbolData[] | null = null;
-	let loading = false;
-	let error = '';
-	let active = false;
+	let searchText = $state('');
+	let suggestions: SymbolData[] = $state([]);
+	let loading = $state(false);
+	let error = $state('');
+	let active = $state(false);
+	let highlightedIndex = $state(-1);
+	let { addSymbolToWatchlist } = $props();
 	let debounceTimeout: ReturnType<typeof setTimeout>;
-	let highlightedIndex = -1;
 
 	async function fetchSuggestion() {
 		if (!searchText.trim()) {
-			suggestions = null;
+			suggestions = [];
 			error = '';
 			loading = false;
 			return;
@@ -27,21 +25,21 @@
 		try {
 			const response = await fetch(`/api/search?q=${encodeURIComponent(searchText)}`);
 			if (!response.ok) {
-				suggestions = null;
+				suggestions = [];
 				error = `Error: ${response.status}`;
 			}
 			const data = await response.json();
 
 			if (data.data.items.length > 0) {
-				suggestions = data.data.items.map((item) => ({
+				suggestions = data.data.items.map((item: SymbolData) => ({
 					symbol: item.symbol,
 					description: item.description
 				}));
 			} else {
-				suggestions = null;
+				suggestions = [];
 			}
 		} catch (error) {
-			suggestions = null;
+			suggestions = [];
 			error = 'Fetch error';
 		} finally {
 			loading = false;
@@ -54,16 +52,12 @@
 		active = true;
 	}
 
-	function selectSymbol(symbol: string) {
-		dispatch('symbolSelected', { symbol });
-	}
-
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && suggestions) {
-			selectSymbol(suggestions[highlightedIndex].symbol);
+			e.preventDefault();
+			addSymbolToWatchlist(suggestions[highlightedIndex].symbol);
 			searchText = '';
 			active = false;
-			e.preventDefault();
 		} else if (e.key === 'ArrowDown') {
 			e.preventDefault();
 			highlightedIndex = (highlightedIndex + 1) % suggestions.length;
@@ -76,7 +70,7 @@
 	}
 
 	function handleClick(symbol: string) {
-		selectSymbol(symbol);
+		addSymbolToWatchlist(symbol);
 		searchText = '';
 		active = false;
 	}
@@ -85,8 +79,8 @@
 <input
 	type="text"
 	bind:value={searchText}
-	on:input={handleInput}
-	on:keydown={handleKeydown}
+	oninput={handleInput}
+	onkeydown={handleKeydown}
 	placeholder="Search a symbol..."
 	autocomplete="off"
 	class="searchbox"
@@ -103,10 +97,12 @@
 {#if active && suggestions}
 	<ul class="suggestions">
 		{#each suggestions as { symbol, description }, i}
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 			<li
 				class="suggestion-item"
 				class:highlighted={highlightedIndex === i}
-				on:click={() => handleClick(symbol)}
+				onclick={() => handleClick(symbol)}
 			>
 				<span class="symbol">{symbol}</span>
 				<span class="description">{description}</span>

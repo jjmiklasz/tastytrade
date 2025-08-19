@@ -40,6 +40,7 @@
 		startPolling();
 
 		return () => {
+			entryData = undefined;
 			clearInterval(intervalId);
 		};
 	});

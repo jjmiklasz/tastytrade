@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import SymbolSearch from '$lib/SymbolSearch.svelte';
 	import Watchlist from '$lib/Watchlist.svelte';
 	import { ArrowLeft, ArrowRight, Trash2 } from 'lucide-svelte';
@@ -39,9 +38,7 @@
 		});
 	}
 
-	function addSymbolToWatchlist(event: any) {
-		const symbol = event.detail.symbol;
-
+	function addSymbolToWatchlist(symbol: string) {
 		watchLists = watchLists.map((watchlist: Watchlist, index: number) => {
 			if (index === currentWatchlistIndex) {
 				return {
@@ -165,7 +162,7 @@
 	{#if currentWatchlistIndex !== -1 && watchLists.length > 0}
 		<div class="market-data">
 			<div class="symbol-search-header">
-				<SymbolSearch on:symbolSelected={addSymbolToWatchlist} />
+				<SymbolSearch {addSymbolToWatchlist} />
 			</div>
 			<div class="watchlist-wrapper">
 				<Watchlist

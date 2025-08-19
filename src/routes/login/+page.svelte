@@ -12,7 +12,6 @@
 	use:enhance={() => {
 		loading = true;
 		return async ({ result }) => {
-			// await result;
 			loading = false;
 			if (result.type === 'success') {
 				goto('/');
