@@ -25,20 +25,6 @@
 
 	let intervalId: number;
 
-	// onMount(() => {
-	// 	fetchMarketData();
-
-	// 	intervalId = setInterval(fetchMarketData, 5000);
-
-	// 	return () => {
-	// 		clearInterval(intervalId);
-	// 	};
-	// });
-
-	// function deleteEntry() {
-	// 	clearInterval(intervalId);
-	// 	removeSymbolFromWatchlist(entry.symbol);
-	// }
 	function startPolling() {
 		clearInterval(intervalId);
 		fetchMarketData();
